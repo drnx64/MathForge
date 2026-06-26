@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { HistoryEntry, CustomMacro } from '../types';
-import { loadHistory, clearHistory } from '../utils/history';
+import { loadHistory, saveHistory, clearHistory } from '../utils/history';
 import { loadMacros, saveMacros } from '../utils/macros';
 import { formatTimestamp } from '../utils/latex';
 import { GREEK_LETTERS, MATH_SYMBOLS } from '../data/symbols';
@@ -9,21 +9,25 @@ interface SidebarProps {
   onRestore: (entry: HistoryEntry) => void;
   onMacroChange: (macros: CustomMacro[]) => void;
   onInsertSnippet: (snippet: string) => void;
+  historyVersion?: number;
 }
 
 type Tab = 'greek' | 'symbols' | 'history' | 'macros';
 
-export function Sidebar({ onRestore, onMacroChange, onInsertSnippet }: SidebarProps) {
+export function Sidebar({ onRestore, onMacroChange, onInsertSnippet, historyVersion = 0 }: SidebarProps) {
   const [tab, setTab] = useState<Tab>('greek');
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [macros, setMacros] = useState<CustomMacro[]>([]);
   const [macroName, setMacroName] = useState('');
   const [macroExp, setMacroExp] = useState('');
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     setHistory(loadHistory());
     setMacros(loadMacros());
   }, []);
+
+  useEffect(() => { load(); }, [load, historyVersion]);
 
   const handleClear = () => { clearHistory(); setHistory([]); };
 
@@ -46,6 +50,24 @@ export function Sidebar({ onRestore, onMacroChange, onInsertSnippet }: SidebarPr
     onMacroChange(updated);
   };
 
+  // Drag-to-reorder history
+  const handleDragStart = (idx: number) => { setDragIdx(idx); };
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === idx) return;
+    const reordered = [...history];
+    const [item] = reordered.splice(dragIdx, 1);
+    reordered.splice(idx, 0, item);
+    setHistory(reordered);
+    setDragIdx(idx);
+  };
+  const handleDrop = () => {
+    if (dragIdx === null) return;
+    saveHistory(history);
+    setDragIdx(null);
+  };
+  const handleDragEnd = () => { setDragIdx(null); };
+
   const tabs: { key: Tab; label: string }[] = [
     { key: 'greek', label: 'Greek' },
     { key: 'symbols', label: 'Symbols' },
@@ -55,7 +77,6 @@ export function Sidebar({ onRestore, onMacroChange, onInsertSnippet }: SidebarPr
 
   return (
     <div className="w-64 shrink-0 border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden">
-      {/* Tabs */}
       <div className="flex border-b border-gray-200 dark:border-gray-700">
         {tabs.map(t => (
           <button key={t.key} type="button" onClick={() => setTab(t.key)}
@@ -69,7 +90,6 @@ export function Sidebar({ onRestore, onMacroChange, onInsertSnippet }: SidebarPr
       </div>
 
       <div className="flex-1 overflow-y-auto p-2">
-        {/* Greek — show only the letter character */}
         {tab === 'greek' && (
           <div className="grid grid-cols-4 gap-1">
             {GREEK_LETTERS.map(g => (
@@ -80,7 +100,6 @@ export function Sidebar({ onRestore, onMacroChange, onInsertSnippet }: SidebarPr
           </div>
         )}
 
-        {/* Symbols */}
         {tab === 'symbols' && (
           <div className="grid grid-cols-4 gap-1">
             {MATH_SYMBOLS.map(t => (
@@ -91,17 +110,26 @@ export function Sidebar({ onRestore, onMacroChange, onInsertSnippet }: SidebarPr
           </div>
         )}
 
-        {/* History */}
         {tab === 'history' && (
           <>
             {history.length === 0 && <div className="text-xs text-gray-400 text-center py-4">No history yet</div>}
-            {history.map(entry => (
-              <button key={entry.id} type="button" onClick={() => onRestore(entry)}
-                className="w-full text-left p-2 mb-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-mono text-gray-700 dark:text-gray-300 border border-transparent hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+            {history.map((entry, idx) => (
+              <div key={entry.id}
+                draggable
+                onDragStart={() => handleDragStart(idx)}
+                onDragOver={(e) => handleDragOver(e, idx)}
+                onDrop={handleDrop}
+                onDragEnd={handleDragEnd}
+                className={`group flex items-center gap-1 p-1 mb-1 rounded text-xs font-mono text-gray-700 dark:text-gray-300 border border-transparent transition-colors ${
+                  dragIdx === idx ? 'opacity-50 border-dashed border-gray-400' : 'hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
               >
-                <div className="truncate">{entry.latex}</div>
-                <div className="text-[10px] text-gray-400 mt-0.5">{formatTimestamp(entry.timestamp)}</div>
-              </button>
+                <span className="text-gray-300 dark:text-gray-500 cursor-grab text-[10px] px-0.5 select-none">&#x2630;</span>
+                <button type="button" onClick={() => onRestore(entry)} className="flex-1 text-left truncate min-w-0">
+                  <div className="truncate">{entry.latex}</div>
+                  <div className="text-[10px] text-gray-400">{formatTimestamp(entry.timestamp)}</div>
+                </button>
+              </div>
             ))}
             {history.length > 0 && (
               <button type="button" onClick={handleClear} className="w-full text-center py-1 text-[11px] text-red-500 hover:text-red-600 mt-2">Clear history</button>
@@ -109,7 +137,6 @@ export function Sidebar({ onRestore, onMacroChange, onInsertSnippet }: SidebarPr
           </>
         )}
 
-        {/* Macros */}
         {tab === 'macros' && (
           <>
             <div className="flex gap-1 mb-2">

@@ -16,3 +16,12 @@ body {
   flex-direction: column;
   overflow: hidden;
 }
+
+@media print {
+  body { background: white !important; }
+  #root > header, #root > footer, nav, .sidebar, [class*="sidebar"] { display: none !important; }
+  #root > div { overflow: visible !important; }
+  math-field { display: none !important; }
+  .print-area { display: block !important; }
+  svg { max-width: 100% !important; height: auto !important; }
+}

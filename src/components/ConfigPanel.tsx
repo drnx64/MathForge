@@ -10,6 +10,7 @@ interface ConfigPanelProps {
   onExportSVG: () => void;
   onExportPNG: () => void;
   onExportJPG: () => void;
+  onExportPDF: () => void;
   disabled: boolean;
 }
 
@@ -23,13 +24,13 @@ export function ConfigPanel({
   onExportSVG,
   onExportPNG,
   onExportJPG,
+  onExportPDF,
   disabled,
 }: ConfigPanelProps) {
   const dpiOptions = [150, 300, 600, 1200];
 
   return (
     <footer className="flex items-center gap-3 px-3 py-1.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 shrink-0">
-      {/* Font Size */}
       <label className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
         Size:
         <input
@@ -42,7 +43,6 @@ export function ConfigPanel({
         />
       </label>
 
-      {/* Padding */}
       <label className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
         Pad:
         <input
@@ -55,7 +55,6 @@ export function ConfigPanel({
         />
       </label>
 
-      {/* DPI */}
       <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
         <span>DPI:</span>
         {dpiOptions.map(d => (
@@ -73,7 +72,6 @@ export function ConfigPanel({
         ))}
       </div>
 
-      {/* Presets */}
       <select
         onChange={e => {
           const idx = Number(e.target.value);
@@ -88,7 +86,6 @@ export function ConfigPanel({
         ))}
       </select>
 
-      {/* Background */}
       <label className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
         BG:
         <input
@@ -101,7 +98,14 @@ export function ConfigPanel({
 
       <div className="flex-1" />
 
-      {/* Export buttons */}
+      <button
+        onClick={onExportPDF}
+        disabled={disabled}
+        className="px-2.5 py-0.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        PDF
+      </button>
+
       <button
         onClick={onExportSVG}
         disabled={disabled}
