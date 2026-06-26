@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --font-mono: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', ui-monospace, Consolas, monospace;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
