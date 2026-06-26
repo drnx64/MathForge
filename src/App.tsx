@@ -150,20 +150,35 @@ export default function App() {
       />
 
       <div className="flex-1 flex overflow-hidden" style={{ minHeight: 0 }}>
-        <div className="flex-1 flex overflow-auto bg-white dark:bg-gray-900 p-6 items-start justify-center">
-          <math-field
-            ref={setMfRef}
-            className="w-full max-w-3xl"
-            style={{
-              fontSize: `${settings.editorFontSize}px`,
-              '--mathfield-placeholder-color': '#9ca3af',
-              minHeight: '80px',
-            } as React.CSSProperties}
-            placeholder="Type math here..."
-            virtual-keyboard-policy="manual"
-            smart-fence
-            smart-mode
-          />
+        <div className="flex-1 flex flex-col overflow-hidden" style={{ minHeight: 0 }}>
+          <div className="flex-1 overflow-auto bg-white dark:bg-gray-900 p-6 flex items-start justify-center">
+            <math-field
+              ref={setMfRef}
+              className="w-full max-w-3xl"
+              style={{
+                fontSize: `${settings.editorFontSize}px`,
+                '--mathfield-placeholder-color': '#9ca3af',
+                minHeight: '80px',
+              } as React.CSSProperties}
+              placeholder="Type math here..."
+              virtual-keyboard-policy="manual"
+              smart-fence
+              smart-mode
+            />
+          </div>
+
+          {/* Preview panel */}
+          {svgHtml && (
+            <div className="shrink-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+              <div className="flex items-center gap-2 px-4 pt-2 pb-1">
+                <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Preview</span>
+              </div>
+              <div className="px-6 pb-4 flex justify-center"
+                style={{ fontSize: `${settings.fontSize * 1.2}px` }}>
+                <div dangerouslySetInnerHTML={{ __html: svgHtml }} />
+              </div>
+            </div>
+          )}
         </div>
 
         <Sidebar
