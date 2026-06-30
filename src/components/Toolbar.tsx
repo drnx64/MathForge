@@ -82,7 +82,7 @@ function Dropdown({ label, children }: { label: string; children: React.ReactNod
 
 export function Toolbar({
   onInsert, onInsertSnippet, onRandomVar, onTemplate, onColorInsert,
-  onToggleLatexCode, showLatexCode, latexCode, templates,
+  onToggleLatexCode, showLatexCode, templates,
   theme, onToggleTheme, onToggleGrid, showGrid,
   onToggleSidebar, sidebarOpen, onOpenMatrix
 }: ToolbarProps) {

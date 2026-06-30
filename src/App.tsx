@@ -1,5 +1,5 @@
 import 'mathlive';
-import { useState, useCallback, useRef, useEffect, type ChangeEvent } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Toolbar } from './components/Toolbar';
 import { Sidebar } from './components/Sidebar';
 import { ConfigPanel } from './components/ConfigPanel';
@@ -60,7 +60,7 @@ export default function App() {
   const mfRef = useRef<any>(null);
   const compileTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const svgElementRef = useRef<SVGSVGElement | null>(null);
-  const autoSaveRef = useRef<ReturnType<typeof setTimeout>>();
+  const autoSaveRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const mathjax = useMathJax();
   const settings = useSettings();
@@ -143,7 +143,7 @@ export default function App() {
     const el = mfRef.current;
     if (el) {
       const macroObj: Record<string, string> = {};
-      macros.forEach(m => { macroObj[m.name] = m.value; });
+      macros.forEach(m => { macroObj[m.name] = m.expansion; });
       el.macros = macroObj;
     }
   }, []);
@@ -192,7 +192,7 @@ export default function App() {
     // Apply saved macros
     if (customMacros.length > 0) {
       const macroObj: Record<string, string> = {};
-      customMacros.forEach(m => { macroObj[m.name] = m.value; });
+      customMacros.forEach(m => { macroObj[m.name] = m.expansion; });
       mf.macros = macroObj;
     }
   }, []);

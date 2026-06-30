@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import 'mathlive';
-import type MathfieldElement from 'mathlive';
+import type { MathfieldElement } from 'mathlive';
 
 export interface MathFieldHandle {
   insert(latex: string): void;
